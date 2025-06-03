@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico - FinanceApp</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Link de Pular Navegação -->
+    <a href="#main-content" class="skip-link visually-hidden-focusable">Pular para o conteúdo principal</a>
+    
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary" role="navigation" aria-label="Navegação principal">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="dashboard.html" aria-label="FinanceApp - Ir para dashboard">
+                <i class="bi bi-wallet2" aria-hidden="true"></i> FinanceApp
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="dashboard.html" aria-label="Ir para Dashboard">
+                        <i class="bi bi-speedometer2" aria-hidden="true"></i> Dashboard
+                    </a>
+                    <a class="nav-link" href="transactions.html" aria-label="Ir para Transações">
+                        <i class="bi bi-plus-circle" aria-hidden="true"></i> Transações
+                    </a>
+                    <a class="nav-link active" href="history.html" aria-current="page" aria-label="Página atual - Histórico">
+                        <i class="bi bi-clock-history" aria-hidden="true"></i> Histórico
+                    </a>
+                    <a class="nav-link" href="reports.html" aria-label="Ir para Relatórios">
+                        <i class="bi bi-bar-chart" aria-hidden="true"></i> Relatórios
+                    </a>
+                    <button class="btn btn-outline-light btn-sm" onclick="logout()" aria-label="Fazer logout">
+                        <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Sair
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <main class="container mt-4" id="main-content" tabindex="-1">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="h2 mb-4" id="page-title">
+                    <i class="bi bi-clock-history text-primary" aria-hidden="true"></i>
+                    Histórico de Transações
+                </h1>
+            </div>
+        </div>
+        
+        <!-- Filtros -->
+        <section class="card mb-4" aria-labelledby="filters-title">
+            <div class="card-header">
+                <h2 class="h5 mb-0" id="filters-title">
+                    <i class="bi bi-funnel" aria-hidden="true"></i>
+                    Filtros de Pesquisa
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="filterType" class="form-label">Tipo</label>
+                        <select id="filterType" class="form-select" onchange="applyFilters()" aria-describedby="typeHelp">
+                            <option value="">Todos os tipos</option>
+                            <option value="income">Receitas</option>
+                            <option value="expense">Despesas</option>
+                        </select>
+                        <div id="typeHelp" class="form-text">Filtrar por tipo de transação</div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="filterCategory" class="form-label">Categoria</label>
+                        <select id="filterCategory" class="form-select" onchange="applyFilters()">
+                            <option value="">Todas as categorias</option>
+                            <option value="Alimentação">Alimentação</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Saúde">Saúde</option>
+                            <option value="Salário">Salário</option>
+                            <option value="Extra">Extra</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="filterMonth" class="form-label">Mês</label>
+                        <input type="month" id="filterMonth" class="form-control" onchange="applyFilters()">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="button" class="btn btn-outline-secondary me-2" onclick="clearFilters()">
+                            <i class="bi bi-x-circle" aria-hidden="true"></i>
+                            Limpar
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="applyFilters()">
+                            <i class="bi bi-search" aria-hidden="true"></i>
+                            Buscar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabela de Transações -->
+        <section class="card" aria-labelledby="transactions-title">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="h5 mb-0" id="transactions-title">
+                    <i class="bi bi-table" aria-hidden="true"></i>
+                    Lista de Transações
+                </h2>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary" id="transactionCount">0 transações</span>
+                    <div class="btn-group" role="group" aria-label="Itens por página">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="changeItemsPerPage(5)">5</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm active" onclick="changeItemsPerPage(10)">10</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="changeItemsPerPage(25)">25</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" role="table" aria-label="Tabela de transações financeiras">
+                        <thead class="table-light">
+                            <tr role="row">
+                                <th role="columnheader" scope="col" class="sortable" onclick="sortTable(0)" aria-label="Ordenar por data">
+                                    Data 
+                                    <i class="bi bi-chevron-expand sort-icon" aria-hidden="true"></i>
+                                </th>
+                                <th role="columnheader" scope="col" class="sortable" onclick="sortTable(1)" aria-label="Ordenar por descrição">
+                                    Descrição
+                                    <i class="bi bi-chevron-expand sort-icon" aria-hidden="true"></i>
+                                </th>
+                                <th role="columnheader" scope="col" class="sortable" onclick="sortTable(2)" aria-label="Ordenar por categoria">
+                                    Categoria
+                                    <i class="bi bi-chevron-expand sort-icon" aria-hidden="true"></i>
+                                </th>
+                                <th role="columnheader" scope="col" class="sortable" onclick="sortTable(3)" aria-label="Ordenar por tipo">
+                                    Tipo
+                                    <i class="bi bi-chevron-expand sort-icon" aria-hidden="true"></i>
+                                </th>
+                                <th role="columnheader" scope="col" class="sortable" onclick="sortTable(4)" aria-label="Ordenar por valor">
+                                    Valor
+                                    <i class="bi bi-chevron-expand sort-icon" aria-hidden="true"></i>
+                                </th>
+                                <th role="columnheader" scope="col">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTableBody" role="rowgroup">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox display-1 text-muted" aria-hidden="true"></i>
+                                    <p class="mb-0">Carregando transações...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Informações de Paginação -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted" id="paginationInfo">
+                        Mostrando 0 de 0 transações
+                    </div>
+                    <nav aria-label="Navegação da tabela">
+                        <ul class="pagination pagination-sm mb-0" id="paginationControls">
+                            <!-- Paginação será gerada dinamicamente -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">
+                        <i class="bi bi-exclamation-triangle text-warning" aria-hidden="true"></i>
+                        Confirmar Exclusão
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir esta transação?</p>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-info-circle" aria-hidden="true"></i>
+                        Esta ação não pode ser desfeita.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x" aria-hidden="true"></i>
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="deleteTransaction()" id="confirmDeleteBtn">
+                        <i class="bi bi-trash" aria-hidden="true"></i>
+                        Excluir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Verificar se está logado
+        if (!localStorage.getItem('loggedIn')) {
+            window.location.href = 'login.html';
+        }
+
+        // Inicializar página de histórico
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSampleData();
+            loadHistoryPage();
+        });
+    </script>
+</body>
+</html>

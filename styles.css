@@ -1,0 +1,89 @@
+/* FinanceApp - CSS Customizado para Acessibilidade e Usabilidade */
+
+/* === SKIP LINK PARA ACESSIBILIDADE === */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: #007bff;
+    color: white;
+    padding: 8px;
+    text-decoration: none;
+    transition: top 0.3s;
+    z-index: 9999;
+}
+
+.skip-link:focus {
+    top: 6px;
+}
+
+/* === MELHORIAS DE ACESSIBILIDADE === */
+:focus {
+    outline: 3px solid #007bff !important;
+    outline-offset: 2px;
+}
+
+button:focus, .btn:focus {
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25) !important;
+}
+
+/* === MELHORIAS DE CONTRASTE === */
+.text-muted { color: #495057 !important; }
+.bg-primary { background-color: #0056b3 !important; }
+
+/* === FEEDBACK VISUAL === */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+    cursor: wait;
+}
+
+.success-flash {
+    animation: flashSuccess 0.5s ease-in-out;
+}
+
+@keyframes flashSuccess {
+    0% { background-color: #d4edda; }
+    100% { background-color: transparent; }
+}
+
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+    .container { padding: 0 15px; }
+    .card { margin-bottom: 1rem; }
+    .navbar-nav { flex-direction: column; }
+}
+
+/* === ESTADOS DE ERRO === */
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-top: 5px;
+    font-size: 0.875rem;
+}
+
+/* === NAVEGAÇÃO ACESSÍVEL === */
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link:focus {
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 4px;
+}
+
+/* === MELHORIAS DE USABILIDADE === */
+.card:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* === INDICADORES VISUAIS === */
+.required::after {
+    content: " *";
+    color: #dc3545;
+}
