@@ -150,6 +150,9 @@ function updateCategoryChart(categoryData) {
             }
         }
     });
+
+    // Adicionar narração acessível do gráfico
+    generateChartNarration('categoryChart', 'category', categoryData);
 }
 
 function updateComparisonChart(income, expenses) {
@@ -190,6 +193,131 @@ function updateComparisonChart(income, expenses) {
             }
         }
     });
+
+    // Adicionar narração acessível do gráfico
+    generateChartNarration('comparisonChart', 'comparison', { income, expenses });
+}
+
+// === FUNÇÃO DE NARRAÇÃO PARA GRÁFICOS ===
+
+function generateChartNarration(chartId, chartType, data) {
+    const chartContainer = document.getElementById(chartId)?.parentElement;
+    if (!chartContainer) return;
+
+    // Remover narração anterior se existir
+    const existingNarration = chartContainer.querySelector('.chart-narration');
+    if (existingNarration) {
+        existingNarration.remove();
+    }
+
+    let narrationText = '';
+    let narrationHTML = '';
+
+    if (chartType === 'category') {
+        const total = Object.values(data).reduce((sum, value) => sum + value, 0);
+        const categories = Object.entries(data)
+            .sort(([,a], [,b]) => b - a)
+            .map(([category, amount]) => {
+                const percentage = ((amount / total) * 100).toFixed(1);
+                return { category, amount, percentage };
+            });
+
+        narrationText = `Gráfico de gastos por categoria. Total de ${formatCurrency(total)} distribuído em ${categories.length} categorias. `;
+        
+        narrationHTML = `
+            <div class="chart-narration mt-3" role="img" aria-label="${narrationText}">
+                <h6><i class="fas fa-audio-description me-2"></i>Descrição do Gráfico</h6>
+                <div class="alert alert-info">
+                    <p><strong>Distribuição de Gastos por Categoria:</strong></p>
+                    <ul class="mb-0">
+        `;
+
+        categories.forEach(({ category, amount, percentage }) => {
+            narrationHTML += `
+                <li>${category}: ${formatCurrency(amount)} (${percentage}% do total)</li>
+            `;
+            narrationText += `${category}: ${formatCurrency(amount)} representando ${percentage}% do total. `;
+        });        narrationHTML += `
+                    </ul>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" onclick="speakChartNarration(this, '${narrationText.replace(/'/g, '\\\'')}')" 
+                        aria-label="Ouvir descrição do gráfico">
+                    <i class="fas fa-volume-up me-1"></i>Ouvir Descrição
+                </button>
+            </div>
+        `;
+
+    } else if (chartType === 'comparison') {
+        const { income, expenses } = data;
+        const balance = income - expenses;
+        const balanceType = balance >= 0 ? 'positivo' : 'negativo';
+        
+        narrationText = `Gráfico de comparação financeira. Receitas: ${formatCurrency(income)}. Despesas: ${formatCurrency(expenses)}. Saldo ${balanceType}: ${formatCurrency(Math.abs(balance))}.`;
+        
+        narrationHTML = `
+            <div class="chart-narration mt-3" role="img" aria-label="${narrationText}">
+                <h6><i class="fas fa-audio-description me-2"></i>Descrição do Gráfico</h6>
+                <div class="alert alert-info">
+                    <p><strong>Comparação Receitas vs Despesas:</strong></p>
+                    <ul class="mb-0">
+                        <li>Receitas: ${formatCurrency(income)}</li>
+                        <li>Despesas: ${formatCurrency(expenses)}</li>
+                        <li>Saldo ${balanceType}: ${formatCurrency(Math.abs(balance))}</li>
+                        <li>Porcentagem de economia: ${income > 0 ? (((income - expenses) / income) * 100).toFixed(1) : 0}%</li>                    </ul>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" onclick="speakChartNarration(this, '${narrationText.replace(/'/g, '\\\'')}')" 
+                        aria-label="Ouvir descrição do gráfico">
+                    <i class="fas fa-volume-up me-1"></i>Ouvir Descrição
+                </button>
+            </div>
+        `;
+    }
+
+    chartContainer.insertAdjacentHTML('beforeend', narrationHTML);
+}
+
+// Função para sintetizar voz (quando disponível)
+function speakChartNarration(buttonElement, text) {
+    if ('speechSynthesis' in window) {
+        // Parar qualquer narração anterior
+        speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'pt-BR';
+        utterance.rate = 0.8;
+        utterance.pitch = 1;
+        
+        // Tentar encontrar voz em português
+        const voices = speechSynthesis.getVoices();
+        const portugueseVoice = voices.find(voice => 
+            voice.lang.includes('pt') || voice.lang.includes('BR')
+        );
+        
+        if (portugueseVoice) {
+            utterance.voice = portugueseVoice;
+        }
+        
+        speechSynthesis.speak(utterance);
+        
+        // Feedback visual
+        const button = buttonElement;
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-stop me-1"></i>Parando...';
+        button.disabled = true;
+        
+        utterance.onend = () => {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        };
+        
+        utterance.onerror = () => {
+            button.innerHTML = originalText;
+            button.disabled = false;
+            alert('Erro ao reproduzir áudio. Verifique se o seu navegador suporta síntese de voz.');
+        };
+    } else {
+        alert('Seu navegador não suporta síntese de voz. A descrição textual está disponível acima do gráfico.');
+    }
 }
 
 function generateInsights(income, expenses, transactions) {
@@ -290,9 +418,8 @@ function loadTransactions() {
                 <span class="badge ${t.type === 'income' ? 'bg-success' : 'bg-danger'}">
                     ${formatCurrency(t.amount)}
                 </span>
-            </td>
-            <td>
-                <button class="btn btn-sm btn-outline-danger" onclick="deleteTransaction(${index})" 
+            </td>            <td>
+                <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteTransaction(${t.id})" 
                         aria-label="Excluir transação ${t.description}">
                     <i class="fas fa-trash"></i>
                 </button>
@@ -301,14 +428,133 @@ function loadTransactions() {
     `).join('');
 }
 
-function deleteTransaction(index) {
-    if (confirm('Tem certeza que deseja excluir esta transação?')) {
-        const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
-        transactions.splice(index, 1);
-        localStorage.setItem('transactions', JSON.stringify(transactions));
-        loadTransactions();
-        showSuccessMessage('Transação excluída com sucesso!');
+// === FUNÇÕES DE TRANSAÇÕES ===
+
+let currentTransactionId = null;
+
+function loadTransactionsPage() {
+    loadTransactionsWithFilters();
+    updateTransactionCount();
+}
+
+function showAddTransactionModal(type = '') {
+    currentTransactionId = null;
+    
+    // Limpar formulário
+    document.getElementById('transactionForm').reset();
+    
+    // Configurar modal para nova transação
+    document.getElementById('transactionModalLabel').innerHTML = 
+        '<i class="bi bi-plus-circle text-primary"></i> Nova Transação';
+    
+    // Pré-selecionar tipo se fornecido
+    if (type) {
+        document.getElementById('type').value = type;
+        updateCategoryOptions(type);
     }
+    
+    // Definir data padrão como hoje
+    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    
+    // Mostrar modal
+    new bootstrap.Modal(document.getElementById('transactionModal')).show();
+}
+
+function setupTransactionModal() {
+    // Event listener para mudança de tipo
+    document.getElementById('type').addEventListener('change', function() {
+        updateCategoryOptions(this.value);
+    });
+    
+    // Event listener para o formulário
+    document.getElementById('transactionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveTransaction();
+    });
+}
+
+function updateCategoryOptions(type) {
+    const categorySelect = document.getElementById('category');
+    categorySelect.innerHTML = '<option value="">Selecione a categoria</option>';
+    
+    let categories = [];
+    
+    if (type === 'expense') {
+        categories = [
+            'Alimentação', 'Transporte', 'Moradia', 'Saúde', 'Educação', 
+            'Lazer', 'Compras', 'Serviços', 'Outros'
+        ];
+    } else if (type === 'income') {
+        categories = [
+            'Salário', 'Freelance', 'Investimentos', 'Vendas', 'Outros'
+        ];
+    }
+    
+    categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        categorySelect.appendChild(option);
+    });
+}
+
+function saveTransaction() {
+    const formData = {
+        id: currentTransactionId || Date.now(),
+        description: document.getElementById('description').value,
+        amount: parseFloat(document.getElementById('amount').value),
+        type: document.getElementById('type').value,
+        category: document.getElementById('category').value,
+        date: document.getElementById('date').value
+    };
+    
+    let transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+    
+    if (currentTransactionId) {
+        // Editar transação existente
+        const index = transactions.findIndex(t => t.id === currentTransactionId);
+        if (index !== -1) {
+            transactions[index] = formData;
+        }
+    } else {
+        // Adicionar nova transação
+        transactions.push(formData);
+    }
+    
+    localStorage.setItem('transactions', JSON.stringify(transactions));
+    
+    // Fechar modal e atualizar lista
+    bootstrap.Modal.getInstance(document.getElementById('transactionModal')).hide();
+    loadTransactionsWithFilters();
+    updateTransactionCount();
+    
+    showSuccessMessage(`Transação ${currentTransactionId ? 'atualizada' : 'adicionada'} com sucesso!`);
+}
+
+function editTransaction(id) {
+    const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+    const transaction = transactions.find(t => t.id === id);
+    
+    if (!transaction) return;
+    
+    currentTransactionId = id;
+    
+    // Preencher formulário com dados da transação
+    document.getElementById('description').value = transaction.description;
+    document.getElementById('amount').value = transaction.amount;
+    document.getElementById('type').value = transaction.type;
+    document.getElementById('date').value = transaction.date;
+    
+    // Atualizar categorias e selecionar a categoria da transação
+    updateCategoryOptions(transaction.type);
+    document.getElementById('category').value = transaction.category;
+    
+    // Atualizar título do modal
+    document.getElementById('transactionModalLabel').innerHTML = 
+        '<i class="bi bi-pencil text-primary"></i> Editar Transação';
+    
+    // Mostrar modal
+    new bootstrap.Modal(document.getElementById('transactionModal')).show();
 }
 
 // === FUNÇÕES DE FILTROS ===
@@ -346,9 +592,8 @@ function applyFilters() {
                         <span class="badge ${t.type === 'income' ? 'bg-success' : 'bg-danger'}">
                             ${formatCurrency(t.amount)}
                         </span>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteTransaction(${transactions.indexOf(t)})" 
+                    </td>                    <td>
+                        <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteTransaction(${t.id})" 
                                 aria-label="Excluir transação ${t.description}">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -737,13 +982,7 @@ function deleteTransaction(id) {
     localStorage.setItem('transactions', JSON.stringify(updatedTransactions));
     loadTransactionsWithFilters();
     updateTransactionCount();
-    
-    showSuccessMessage('Transação excluída com sucesso!');
-}
-
-function editTransaction(id) {
-    // Redirecionar para página de transações com ID para edição
-    window.location.href = `transactions.html?edit=${id}`;
+      showSuccessMessage('Transação excluída com sucesso!');
 }
 
 function getCategoryIcon(category) {

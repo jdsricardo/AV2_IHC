@@ -2,10 +2,10 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Histórico - FinanceApp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Metas Financeiras - FinanceApp</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
@@ -27,9 +27,8 @@
                     </a>
                     <a class="nav-link" href="transactions.html" aria-label="Ir para Transações">
                         <i class="bi bi-plus-circle" aria-hidden="true"></i> Transações
-                    </a>
-                    <a class="nav-link active" href="history.html" aria-current="page" aria-label="Página atual - Histórico">
-                        <i class="bi bi-clock-history" aria-hidden="true"></i> Histórico
+                    </a>                    <a class="nav-link active" href="history.html" aria-current="page" aria-label="Página atual - Metas Financeiras">
+                        <i class="bi bi-bullseye" aria-hidden="true"></i> Metas
                     </a>
                     <a class="nav-link" href="reports.html" aria-label="Ir para Relatórios">
                         <i class="bi bi-bar-chart" aria-hidden="true"></i> Relatórios
@@ -40,160 +39,297 @@
                 </div>
             </div>
         </div>
-    </nav>
-      <main class="container mt-4" id="main-content" tabindex="-1">
+    </nav>      <main class="container mt-4" id="main-content" tabindex="-1">
         <div class="row">
             <div class="col-12">
-                <h1 class="h2 mb-4" id="page-title">
-                    <i class="bi bi-clock-history text-primary" aria-hidden="true"></i>
-                    Histórico de Transações
-                </h1>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="h2 mb-0" id="page-title">
+                        <i class="bi bi-bullseye text-primary" aria-hidden="true"></i>
+                        Metas Financeiras
+                    </h1>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#goalModal">
+                        <i class="fas fa-plus me-1"></i>Nova Meta
+                    </button>
+                </div>
             </div>
         </div>
         
-        <!-- Filtros -->
-        <section class="card mb-4" aria-labelledby="filters-title">
-            <div class="card-header">
-                <h2 class="h4 mb-0" id="filters-title">
-                    <i class="bi bi-funnel text-primary" aria-hidden="true"></i>
-                    Filtros de Pesquisa
+        <!-- Resumo de Metas -->
+        <section class="row g-3 mb-4" aria-labelledby="goals-summary-title">
+            <div class="col-12">
+                <h2 class="h4 mb-3" id="goals-summary-title">
+                    <i class="bi bi-graph-up text-success" aria-hidden="true"></i>
+                    Resumo das Metas
                 </h2>
             </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <i class="fas fa-target fa-2x text-primary mb-2"></i>
+                        <h6>Metas Ativas</h6>
+                        <h4 class="text-primary" id="activeGoalsCount">0</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                        <h6>Metas Concluídas</h6>
+                        <h4 class="text-success" id="completedGoalsCount">0</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <i class="fas fa-coins fa-2x text-warning mb-2"></i>
+                        <h6>Valor Total</h6>
+                        <h4 class="text-warning" id="totalGoalsValue">R$ 0,00</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
+                        <h6>Progresso Médio</h6>
+                        <h4 class="text-info" id="averageProgress">0%</h4>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lista de Metas -->
+        <section class="card" aria-labelledby="goals-list-title">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="h4 mb-0" id="goals-list-title">
+                    <i class="bi bi-list-check text-primary" aria-hidden="true"></i>
+                    Suas Metas Financeiras
+                </h2>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button class="btn btn-outline-secondary" onclick="filterGoals('all')" id="filter-all">
+                        Todas
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="filterGoals('active')" id="filter-active">
+                        Ativas
+                    </button>
+                    <button class="btn btn-outline-success" onclick="filterGoals('completed')" id="filter-completed">
+                        Concluídas
+                    </button>
+                </div>
+            </div>
             <div class="card-body">
-                <form id="filtersForm" role="form" aria-label="Formulário de filtros">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label for="filterType" class="form-label">Tipo de Transação:</label>
-                            <select class="form-select" id="filterType" aria-describedby="filterTypeHelp">
-                                <option value="">Todos os tipos</option>
-                                <option value="income">Receitas</option>
-                                <option value="expense">Despesas</option>
-                            </select>
-                            <div id="filterTypeHelp" class="form-text">Filtre por tipo de transação</div>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="filterCategory" class="form-label">Categoria:</label>
-                            <select class="form-select" id="filterCategory" aria-describedby="filterCategoryHelp">
-                                <option value="">Todas as categorias</option>
-                                <option value="alimentacao">Alimentação</option>
-                                <option value="transporte">Transporte</option>
-                                <option value="moradia">Moradia</option>
-                                <option value="saude">Saúde</option>
-                                <option value="educacao">Educação</option>
-                                <option value="lazer">Lazer</option>
-                                <option value="compras">Compras</option>
-                                <option value="servicos">Serviços</option>
-                                <option value="salario">Salário</option>
-                                <option value="freelance">Freelance</option>
-                                <option value="investimentos">Investimentos</option>
-                                <option value="outros">Outros</option>
-                            </select>
-                            <div id="filterCategoryHelp" class="form-text">Selecione uma categoria específica</div>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="filterMonth" class="form-label">Período:</label>
-                            <select class="form-select" id="filterMonth" aria-describedby="filterMonthHelp">
-                                <option value="">Todos os períodos</option>
-                                <option value="2025-01">Janeiro 2025</option>
-                                <option value="2025-02">Fevereiro 2025</option>
-                                <option value="2025-03">Março 2025</option>
-                                <option value="2025-04">Abril 2025</option>
-                                <option value="2025-05">Maio 2025</option>
-                                <option value="2025-06">Junho 2025</option>
-                                <option value="2024-12">Dezembro 2024</option>
-                                <option value="2024-11">Novembro 2024</option>
-                                <option value="2024-10">Outubro 2024</option>
-                            </select>
-                            <div id="filterMonthHelp" class="form-text">Filtre por mês específico</div>
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <div class="btn-group w-100" role="group" aria-label="Ações de filtro">
-                                <button type="button" onclick="applyFilters()" class="btn btn-primary" aria-describedby="applyFiltersHelp">
-                                    <i class="bi bi-search" aria-hidden="true"></i> Filtrar
-                                </button>
-                                <button type="button" onclick="clearFilters()" class="btn btn-outline-secondary" aria-describedby="clearFiltersHelp">
-                                    <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Limpar
-                                </button>
+                <div id="goalsContainer" role="list" aria-label="Lista de metas financeiras">
+                    <div class="text-center py-4">
+                        <i class="bi bi-bullseye display-4 text-muted mb-3"></i>
+                        <h5 class="text-muted">Nenhuma meta cadastrada</h5>
+                        <p class="text-muted">Crie sua primeira meta financeira para começar a planejar seus objetivos!</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#goalModal">
+                            <i class="fas fa-plus me-1"></i>Criar Primeira Meta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dicas para Metas -->
+        <section class="row mt-4" aria-labelledby="tips-title">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h3 class="h5 mb-0" id="tips-title">
+                            <i class="bi bi-lightbulb text-warning" aria-hidden="true"></i>
+                            Dicas para Definir Metas Financeiras
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-crosshairs fa-2x text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6>Seja Específico</h6>
+                                        <p class="small text-muted mb-0">
+                                            Defina exatamente o que quer alcançar: "Economizar R$ 5.000 para uma viagem"
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <div id="applyFiltersHelp" class="visually-hidden">Aplicar filtros selecionados</div>
-                            <div id="clearFiltersHelp" class="visually-hidden">Limpar todos os filtros</div>
+                            <div class="col-md-4">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-calendar-alt fa-2x text-success"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6>Defina Prazos</h6>
+                                        <p class="small text-muted mb-0">
+                                            Estabeleça uma data limite realista para alcançar sua meta
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-chart-bar fa-2x text-warning"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6>Acompanhe o Progresso</h6>
+                                        <p class="small text-muted mb-0">
+                                            Monitore regularmente o progresso e ajuste quando necessário
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>    
+    <!-- Modal para Criar/Editar Meta -->
+    <div class="modal fade" id="goalModal" tabindex="-1" aria-labelledby="goalModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="goalModalLabel">
+                        <i class="bi bi-bullseye text-primary" aria-hidden="true"></i>
+                        Nova Meta Financeira
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar modal"></button>
+                </div>
+                <form id="goalForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="goalTitle" class="form-label required">Título da Meta</label>
+                            <input type="text" class="form-control" id="goalTitle" required 
+                                   placeholder="Ex: Viagem para o exterior, Emergência, Carro novo">
+                            <div class="form-text">Dê um nome claro e motivador para sua meta</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="goalDescription" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="goalDescription" rows="2" 
+                                      placeholder="Descreva os detalhes da sua meta..."></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="goalTarget" class="form-label required">Valor da Meta</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="number" class="form-control" id="goalTarget" required 
+                                               step="0.01" min="0.01" placeholder="0,00">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="goalCurrent" class="form-label">Valor Atual</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="number" class="form-control" id="goalCurrent" 
+                                               step="0.01" min="0" placeholder="0,00" value="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="goalDeadline" class="form-label required">Data Limite</label>
+                                    <input type="date" class="form-control" id="goalDeadline" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="goalCategory" class="form-label">Categoria</label>
+                                    <select class="form-select" id="goalCategory">
+                                        <option value="emergencia">Fundo de Emergência</option>
+                                        <option value="viagem">Viagem</option>
+                                        <option value="casa">Casa Própria</option>
+                                        <option value="veiculo">Veículo</option>
+                                        <option value="educacao">Educação</option>
+                                        <option value="aposentadoria">Aposentadoria</option>
+                                        <option value="investimento">Investimento</option>
+                                        <option value="outros">Outros</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle" aria-hidden="true"></i>
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle" aria-hidden="true"></i>
+                            Salvar Meta
+                        </button>
                     </div>
                 </form>
             </div>
-        </section>
-          <!-- Tabela de Transações -->
-        <section class="card" aria-labelledby="transactions-title">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h2 class="h4 mb-0" id="transactions-title">
-                    <i class="bi bi-list-ul text-primary" aria-hidden="true"></i>
-                    Lista de Transações
-                </h2>
-                <div class="badge bg-secondary" id="transactionCount" aria-live="polite">
-                    Total: 0 transações
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar Valor à Meta -->
+    <div class="modal fade" id="addValueModal" tabindex="-1" aria-labelledby="addValueModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addValueModalLabel">
+                        <i class="bi bi-plus-circle text-success" aria-hidden="true"></i>
+                        Adicionar Valor à Meta
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar modal"></button>
                 </div>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover" id="transactionsTable" role="table" aria-label="Lista de transações financeiras">
-                        <thead class="table-dark">
-                            <tr>
-                                <th scope="col" tabindex="0" role="columnheader" aria-sort="none" onclick="sortTable(0)">
-                                    <i class="bi bi-calendar-event" aria-hidden="true"></i>
-                                    Data
-                                    <i class="bi bi-arrow-down-up ms-1" aria-hidden="true"></i>
-                                </th>
-                                <th scope="col" role="columnheader">
-                                    <i class="bi bi-card-text" aria-hidden="true"></i>
-                                    Descrição
-                                </th>
-                                <th scope="col" role="columnheader">
-                                    <i class="bi bi-tags" aria-hidden="true"></i>
-                                    Categoria
-                                </th>
-                                <th scope="col" tabindex="0" role="columnheader" aria-sort="none" onclick="sortTable(3)">
-                                    <i class="bi bi-arrow-up-down" aria-hidden="true"></i>
-                                    Tipo
-                                    <i class="bi bi-arrow-down-up ms-1" aria-hidden="true"></i>
-                                </th>
-                                <th scope="col" tabindex="0" role="columnheader" aria-sort="none" onclick="sortTable(4)">
-                                    <i class="bi bi-currency-dollar" aria-hidden="true"></i>
-                                    Valor
-                                    <i class="bi bi-arrow-down-up ms-1" aria-hidden="true"></i>
-                                </th>
-                                <th scope="col" role="columnheader" aria-label="Ações disponíveis">
-                                    <i class="bi bi-gear" aria-hidden="true"></i>
-                                    Ações
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody id="transactionsBody" aria-live="polite" aria-label="Dados das transações">
-                            <tr id="noTransactionsRow">
-                                <td colspan="6" class="text-center text-muted py-4">
-                                    <i class="bi bi-inbox display-4 d-block mb-2" aria-hidden="true"></i>
-                                    <p class="mb-0">Nenhuma transação encontrada com os filtros aplicados.</p>
-                                    <small class="text-muted">Tente ajustar os filtros ou adicionar novas transações.</small>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- Paginação -->
-                <nav aria-label="Navegação de páginas" class="mt-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="text-muted small" id="paginationInfo" aria-live="polite">
-                            Mostrando 0 - 0 de 0 transações
+                <form id="addValueForm">
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <h6 id="currentGoalTitle">Meta</h6>
+                            <div class="d-flex justify-content-between">
+                                <span>Progresso atual:</span>
+                                <strong id="currentGoalProgress">R$ 0,00 / R$ 0,00</strong>
+                            </div>
                         </div>
-                        <ul class="pagination pagination-sm mb-0" id="pagination" role="navigation">
-                            <!-- Páginas serão geradas dinamicamente -->
-                        </ul>
+                        
+                        <div class="mb-3">
+                            <label for="addValue" class="form-label required">Valor a Adicionar</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input type="number" class="form-control" id="addValue" required 
+                                       step="0.01" min="0.01" placeholder="0,00">
+                            </div>
+                            <div class="form-text">Quanto você quer adicionar para esta meta?</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="addValueNote" class="form-label">Observações</label>
+                            <input type="text" class="form-control" id="addValueNote" 
+                                   placeholder="Ex: Sobra do salário, venda de item...">
+                        </div>
                     </div>
-                </nav>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle" aria-hidden="true"></i>
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                            Adicionar Valor
+                        </button>
+                    </div>
+                </form>
             </div>
-        </section>
-    </main>
-    
+        </div>
+    </div>
+
     <!-- Modal de Confirmação de Exclusão -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -206,10 +342,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Tem certeza que deseja excluir esta transação?</p>
+                    <p>Tem certeza que deseja excluir esta meta?</p>
                     <div class="alert alert-warning" role="alert">
                         <i class="bi bi-info-circle" aria-hidden="true"></i>
-                        Esta ação não pode ser desfeita.
+                        Esta ação não pode ser desfeita e todos os dados relacionados serão perdidos.
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -219,7 +355,7 @@
                     </button>
                     <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
                         <i class="bi bi-trash" aria-hidden="true"></i>
-                        Excluir
+                        Excluir Meta
                     </button>
                 </div>
             </div>
@@ -227,11 +363,373 @@
     </div>    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
     <script>
-        // Inicializar página de histórico
+        // Verificar se está logado
+        if (!localStorage.getItem('loggedIn')) {
+            window.location.href = 'login.html';
+        }
+
+        // Inicializar página de metas
         document.addEventListener('DOMContentLoaded', function() {
-            initializeSampleData();
-            loadHistoryPage();
+            initializeSampleGoals();
+            loadGoalsPage();
+            
+            // Definir data mínima como hoje
+            document.getElementById('goalDeadline').min = new Date().toISOString().split('T')[0];
         });
+
+        // Inicializar dados de exemplo para metas
+        function initializeSampleGoals() {
+            if (!localStorage.getItem('financialGoals')) {
+                const sampleGoals = [
+                    {
+                        id: 1,
+                        title: 'Fundo de Emergência',
+                        description: 'Reserva para emergências equivalente a 6 meses de gastos',
+                        target: 18000,
+                        current: 7500,
+                        deadline: '2025-12-31',
+                        category: 'emergencia',
+                        status: 'active',
+                        createdAt: '2024-11-01',
+                        history: [
+                            { date: '2024-11-01', amount: 2000, note: 'Depósito inicial' },
+                            { date: '2024-12-01', amount: 1500, note: 'Sobra do salário' },
+                            { date: '2025-01-01', amount: 2000, note: '13º salário' },
+                            { date: '2025-02-01', amount: 1000, note: 'Freelance' },
+                            { date: '2025-03-01', amount: 1000, note: 'Economia mensal' }
+                        ]
+                    },
+                    {
+                        id: 2,
+                        title: 'Viagem para Europa',
+                        description: 'Viagem de 15 dias pela Europa no final do ano',
+                        target: 12000,
+                        current: 3600,
+                        deadline: '2025-10-01',
+                        category: 'viagem',
+                        status: 'active',
+                        createdAt: '2024-10-15',
+                        history: [
+                            { date: '2024-10-15', amount: 1000, note: 'Primeira parcela' },
+                            { date: '2024-11-15', amount: 800, note: 'Economia mensal' },
+                            { date: '2024-12-15', amount: 900, note: 'Bonus de fim de ano' },
+                            { date: '2025-01-15', amount: 900, note: 'Economia mensal' }
+                        ]
+                    },
+                    {
+                        id: 3,
+                        title: 'Notebook Novo',
+                        description: 'Notebook para trabalho e estudos',
+                        target: 4500,
+                        current: 4500,
+                        deadline: '2025-03-01',
+                        category: 'outros',
+                        status: 'completed',
+                        createdAt: '2024-08-01',
+                        completedAt: '2025-02-28',
+                        history: [
+                            { date: '2024-08-01', amount: 1500, note: 'Primeira parcela' },
+                            { date: '2024-09-01', amount: 1000, note: 'Economia mensal' },
+                            { date: '2024-10-01', amount: 1000, note: 'Economia mensal' },
+                            { date: '2024-11-01', amount: 1000, note: 'Economia mensal' }
+                        ]
+                    }
+                ];
+                localStorage.setItem('financialGoals', JSON.stringify(sampleGoals));
+            }
+        }
+
+        function loadGoalsPage() {
+            loadGoalsStats();
+            loadGoalsList();
+        }
+
+        function loadGoalsStats() {
+            const goals = JSON.parse(localStorage.getItem('financialGoals') || '[]');
+            const activeGoals = goals.filter(g => g.status === 'active');
+            const completedGoals = goals.filter(g => g.status === 'completed');
+            const totalValue = goals.reduce((sum, g) => sum + g.target, 0);
+            
+            let totalProgress = 0;
+            if (goals.length > 0) {
+                const progressSum = goals.reduce((sum, g) => sum + (g.current / g.target * 100), 0);
+                totalProgress = progressSum / goals.length;
+            }
+
+            document.getElementById('activeGoalsCount').textContent = activeGoals.length;
+            document.getElementById('completedGoalsCount').textContent = completedGoals.length;
+            document.getElementById('totalGoalsValue').textContent = formatCurrency(totalValue);
+            document.getElementById('averageProgress').textContent = totalProgress.toFixed(1) + '%';
+        }
+
+        function loadGoalsList(filter = 'all') {
+            const goals = JSON.parse(localStorage.getItem('financialGoals') || '[]');
+            let filteredGoals = goals;
+
+            if (filter === 'active') {
+                filteredGoals = goals.filter(g => g.status === 'active');
+            } else if (filter === 'completed') {
+                filteredGoals = goals.filter(g => g.status === 'completed');
+            }
+
+            const container = document.getElementById('goalsContainer');
+            
+            if (filteredGoals.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="bi bi-bullseye display-4 text-muted mb-3"></i>
+                        <h5 class="text-muted">Nenhuma meta encontrada</h5>
+                        <p class="text-muted">
+                            ${filter === 'all' ? 'Crie sua primeira meta financeira!' : `Nenhuma meta ${filter === 'active' ? 'ativa' : 'concluída'} encontrada.`}
+                        </p>
+                        ${filter === 'all' ? '<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#goalModal"><i class="fas fa-plus me-1"></i>Criar Primeira Meta</button>' : ''}
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredGoals.map(goal => {
+                const progress = (goal.current / goal.target) * 100;
+                const daysLeft = Math.ceil((new Date(goal.deadline) - new Date()) / (1000 * 60 * 60 * 24));
+                const isOverdue = daysLeft < 0 && goal.status === 'active';
+                const isCompleted = goal.status === 'completed';
+
+                return `
+                    <div class="card mb-3 ${isCompleted ? 'border-success' : isOverdue ? 'border-danger' : ''}" role="listitem">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title mb-1">
+                                        ${getCategoryIcon(goal.category)} ${goal.title}
+                                        ${isCompleted ? '<span class="badge bg-success ms-2"><i class="bi bi-check-circle"></i> Concluída</span>' : ''}
+                                        ${isOverdue ? '<span class="badge bg-danger ms-2"><i class="bi bi-exclamation-triangle"></i> Atrasada</span>' : ''}
+                                    </h5>
+                                    <p class="card-text text-muted small">${goal.description}</p>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        ${!isCompleted ? `
+                                            <li><a class="dropdown-item" href="#" onclick="showAddValueModal(${goal.id})">
+                                                <i class="bi bi-plus-circle text-success"></i> Adicionar Valor
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="editGoal(${goal.id})">
+                                                <i class="bi bi-pencil text-primary"></i> Editar
+                                            </a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                        ` : ''}
+                                        <li><a class="dropdown-item text-danger" href="#" onclick="confirmDeleteGoal(${goal.id})">
+                                            <i class="bi bi-trash"></i> Excluir
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="small">Progresso: ${formatCurrency(goal.current)} / ${formatCurrency(goal.target)}</span>
+                                    <span class="small fw-bold">${progress.toFixed(1)}%</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar ${progress >= 100 ? 'bg-success' : progress >= 75 ? 'bg-info' : progress >= 50 ? 'bg-warning' : 'bg-primary'}" 
+                                         style="width: ${Math.min(progress, 100)}%" 
+                                         role="progressbar" 
+                                         aria-valuenow="${progress.toFixed(1)}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100"
+                                         aria-label="Progresso da meta: ${progress.toFixed(1)}%">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <small class="text-muted d-block">Data Limite</small>
+                                    <strong class="small ${isOverdue ? 'text-danger' : ''}">${formatDate(goal.deadline)}</strong>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted d-block">Dias Restantes</small>
+                                    <strong class="small ${isOverdue ? 'text-danger' : daysLeft <= 30 ? 'text-warning' : 'text-success'}">
+                                        ${isCompleted ? 'Concluída' : isOverdue ? `${Math.abs(daysLeft)} dias atrasada` : `${daysLeft} dias`}
+                                    </strong>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted d-block">Restante</small>
+                                    <strong class="small">${formatCurrency(Math.max(0, goal.target - goal.current))}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterGoals(filter) {
+            // Atualizar botões ativos
+            document.querySelectorAll('#goalsContainer').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`filter-${filter}`).classList.add('active');
+            
+            loadGoalsList(filter);
+        }
+
+        function getCategoryIcon(category) {
+            const icons = {
+                'emergencia': '<i class="bi bi-shield-check text-primary"></i>',
+                'viagem': '<i class="bi bi-airplane text-info"></i>',
+                'casa': '<i class="bi bi-house text-warning"></i>',
+                'veiculo': '<i class="bi bi-car-front text-secondary"></i>',
+                'educacao': '<i class="bi bi-book text-success"></i>',
+                'aposentadoria': '<i class="bi bi-calendar-check text-primary"></i>',
+                'investimento': '<i class="bi bi-graph-up-arrow text-success"></i>',
+                'outros': '<i class="bi bi-tag text-muted"></i>'
+            };
+            return icons[category] || '<i class="bi bi-bullseye text-primary"></i>';
+        }
+
+        // Gerenciamento de metas
+        let currentGoalId = null;
+
+        document.getElementById('goalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveGoal();
+        });
+
+        document.getElementById('addValueForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            addValueToGoal();
+        });
+
+        function saveGoal() {
+            const goals = JSON.parse(localStorage.getItem('financialGoals') || '[]');
+            const isEdit = currentGoalId !== null;
+            
+            const goalData = {
+                id: isEdit ? currentGoalId : Date.now(),
+                title: document.getElementById('goalTitle').value,
+                description: document.getElementById('goalDescription').value,
+                target: parseFloat(document.getElementById('goalTarget').value),
+                current: parseFloat(document.getElementById('goalCurrent').value) || 0,
+                deadline: document.getElementById('goalDeadline').value,
+                category: document.getElementById('goalCategory').value,
+                status: 'active',
+                createdAt: isEdit ? goals.find(g => g.id === currentGoalId).createdAt : new Date().toISOString().split('T')[0],
+                history: isEdit ? goals.find(g => g.id === currentGoalId).history : []
+            };
+
+            if (isEdit) {
+                const index = goals.findIndex(g => g.id === currentGoalId);
+                goals[index] = goalData;
+            } else {
+                goals.push(goalData);
+                if (goalData.current > 0) {
+                    goalData.history.push({
+                        date: new Date().toISOString().split('T')[0],
+                        amount: goalData.current,
+                        note: 'Valor inicial'
+                    });
+                }
+            }
+
+            localStorage.setItem('financialGoals', JSON.stringify(goals));
+            
+            bootstrap.Modal.getInstance(document.getElementById('goalModal')).hide();
+            resetGoalForm();
+            loadGoalsPage();
+            showSuccessMessage(`Meta ${isEdit ? 'atualizada' : 'criada'} com sucesso!`);
+        }
+
+        function editGoal(id) {
+            const goals = JSON.parse(localStorage.getItem('financialGoals') || '[]');
+            const goal = goals.find(g => g.id === id);
+            
+            if (!goal) return;
+            
+            currentGoalId = id;
+            document.getElementById('goalModalLabel').innerHTML = '<i class="bi bi-pencil text-primary"></i> Editar Meta Financeira';
+            document.getElementById('goalTitle').value = goal.title;
+            document.getElementById('goalDescription').value = goal.description;
+            document.getElementById('goalTarget').value = goal.target;
+            document.getElementById('goalCurrent').value = goal.current;
+            document.getElementById('goalDeadline').value = goal.deadline;
+            document.getElementById('goalCategory').value = goal.category;
+            
+            new bootstrap.Modal(document.getElementById('goalModal')).show();
+        }
+
+        function showAddValueModal(id) {
+            const goals = JSON.parse(localStorage.getItem('financialGoals') || '[]');
+            const goal = goals.find(g => g.id === id);
+            
+            if (!goal) return;
+            
+            currentGoalId = id;
+            document.getElementById('currentGoalTitle').textContent = goal.title;
+            document.getElementById('currentGoalProgress').textContent = `${formatCurrency(goal.current)} / ${formatCurrency(goal.target)}`;
+            document.getElementById('addValue').value = '';
+            document.getElementById('addValueNote').value = '';
+            
+            new bootstrap.Modal(document.getElementById('addValueModal')).show();
+        }
+
+        function addValueToGoal() {
+            const goals = JSON.parse(localStorage.getItem('financialGoals') || '[]');
+            const goalIndex = goals.findIndex(g => g.id === currentGoalId);
+            
+            if (goalIndex === -1) return;
+            
+            const addValue = parseFloat(document.getElementById('addValue').value);
+            const note = document.getElementById('addValueNote').value || 'Depósito adicional';
+            
+            goals[goalIndex].current += addValue;
+            goals[goalIndex].history.push({
+                date: new Date().toISOString().split('T')[0],
+                amount: addValue,
+                note: note
+            });
+            
+            // Verificar se a meta foi atingida
+            if (goals[goalIndex].current >= goals[goalIndex].target && goals[goalIndex].status === 'active') {
+                goals[goalIndex].status = 'completed';
+                goals[goalIndex].completedAt = new Date().toISOString().split('T')[0];
+                showSuccessMessage(`Parabéns! Meta "${goals[goalIndex].title}" foi concluída! 🎉`);
+            } else {
+                showSuccessMessage('Valor adicionado com sucesso!');
+            }
+            
+            localStorage.setItem('financialGoals', JSON.stringify(goals));
+            
+            bootstrap.Modal.getInstance(document.getElementById('addValueModal')).hide();
+            loadGoalsPage();
+        }
+
+        function confirmDeleteGoal(id) {
+            currentGoalId = id;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        function resetGoalForm() {
+            currentGoalId = null;
+            document.getElementById('goalModalLabel').innerHTML = '<i class="bi bi-bullseye text-primary"></i> Nova Meta Financeira';
+            document.getElementById('goalForm').reset();
+        }
+
+        // Event listeners
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            if (currentGoalId) {
+                const goals = JSON.parse(localStorage.getItem('financialGoals') || '[]');
+                const updatedGoals = goals.filter(g => g.id !== currentGoalId);
+                localStorage.setItem('financialGoals', JSON.stringify(updatedGoals));
+                
+                bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                loadGoalsPage();
+                showSuccessMessage('Meta excluída com sucesso!');
+                currentGoalId = null;
+            }
+        });
+
+        document.getElementById('goalModal').addEventListener('hidden.bs.modal', resetGoalForm);
     </script>
 </body>
 </html>
