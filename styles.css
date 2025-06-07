@@ -166,3 +166,36 @@ button:focus, .btn:focus {
 .goal-on-track {
     border-left: 4px solid #28a745;
 }
+
+/* === ESTILOS PARA OPÇÕES DO SELECT DE TRANSAÇÃO === */
+#type option[value="income"] {
+    color: #28a745 !important;
+    font-weight: bold !important;
+    background-color: #f8fff9 !important;
+}
+
+#type option[value="expense"] {
+    color: #dc3545 !important;
+    font-weight: bold !important;
+    background-color: #fff8f8 !important;
+}
+
+/* Estilo para o select quando uma opção colorida está selecionada */
+#type.income-selected {
+    color: #28a745;
+    font-weight: bold;
+    border-color: #28a745;
+    background-color: #f8fff9;
+}
+
+#type.expense-selected {
+    color: #dc3545;
+    font-weight: bold;
+    border-color: #dc3545;
+    background-color: #fff8f8;
+}
+
+/* Animação suave para mudança de cores */
+#type {
+    transition: all 0.3s ease;
+}

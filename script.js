@@ -443,14 +443,26 @@ function showAddTransactionModal(type = '') {
     // Limpar formulário
     document.getElementById('transactionForm').reset();
     
+    // Limpar classes de estilo do select
+    const typeSelect = document.getElementById('type');
+    typeSelect.className = 'form-select';
+    
     // Configurar modal para nova transação
     document.getElementById('transactionModalLabel').innerHTML = 
         '<i class="bi bi-plus-circle text-primary"></i> Nova Transação';
-    
-    // Pré-selecionar tipo se fornecido
+      // Pré-selecionar tipo se fornecido
     if (type) {
-        document.getElementById('type').value = type;
+        const typeSelect = document.getElementById('type');
+        typeSelect.value = type;
         updateCategoryOptions(type);
+        
+        // Aplicar estilo colorido se tipo foi pré-selecionado
+        typeSelect.className = 'form-select'; // Reset classes
+        if (type === 'income') {
+            typeSelect.classList.add('income-selected');
+        } else if (type === 'expense') {
+            typeSelect.classList.add('expense-selected');
+        }
     }
     
     // Definir data padrão como hoje
@@ -464,6 +476,16 @@ function setupTransactionModal() {
     // Event listener para mudança de tipo
     document.getElementById('type').addEventListener('change', function() {
         updateCategoryOptions(this.value);
+        
+        // Aplicar estilo colorido ao select baseado na seleção
+        const typeSelect = this;
+        typeSelect.className = 'form-select'; // Reset classes
+        
+        if (this.value === 'income') {
+            typeSelect.classList.add('income-selected');
+        } else if (this.value === 'expense') {
+            typeSelect.classList.add('expense-selected');
+        }
     });
     
     // Event listener para o formulário
@@ -544,6 +566,15 @@ function editTransaction(id) {
     document.getElementById('amount').value = transaction.amount;
     document.getElementById('type').value = transaction.type;
     document.getElementById('date').value = transaction.date;
+    
+    // Aplicar estilo colorido ao select baseado no tipo da transação
+    const typeSelect = document.getElementById('type');
+    typeSelect.className = 'form-select'; // Reset classes
+    if (transaction.type === 'income') {
+        typeSelect.classList.add('income-selected');
+    } else if (transaction.type === 'expense') {
+        typeSelect.classList.add('expense-selected');
+    }
     
     // Atualizar categorias e selecionar a categoria da transação
     updateCategoryOptions(transaction.type);
