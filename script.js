@@ -768,10 +768,12 @@ function displayTransactionsWithPagination(transactions) {
             <td>
                 <div class="btn-group btn-group-sm" role="group" aria-label="Ações da transação">
                     <button class="btn btn-outline-primary btn-sm" onclick="editTransaction(${transaction.id})" 
+                            title="Editar transação"
                             aria-label="Editar transação ${transaction.description}">
                         <i class="bi bi-pencil" aria-hidden="true"></i>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm" onclick="confirmDeleteTransaction(${transaction.id})" 
+                    <button class="btn btn-outline-danger btn-sm" onclick="confirmDeleteTransaction(${transaction.id}) " 
+                            title="Excluir transação"
                             aria-label="Excluir transação ${transaction.description}">
                         <i class="bi bi-trash" aria-hidden="true"></i>
                     </button>
